@@ -29,12 +29,12 @@ import time
 from datetime import date
 from pathlib import Path
 
-# Linear integration (optional — only active when LINEAR_API_KEY is set)
+# Zapier → Linear integration (optional — only active when ZAPIER_WEBHOOK_URL is set)
 try:
-    from linear_client import LinearClient, post_statement_issues
-    _LINEAR_AVAILABLE = True
+    from zapier_client import post_statement_issues as _zapier_post
+    _ZAPIER_AVAILABLE = True
 except ImportError:
-    _LINEAR_AVAILABLE = False
+    _ZAPIER_AVAILABLE = False
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 DRIVE_ROOT = Path("/Users/gustavooviedo/Library/CloudStorage/GoogleDrive-gustavobills7@gmail.com/My Drive")
@@ -554,16 +554,16 @@ def process_pdf(pdf_path: Path):
         stmts = load_all_statements()
         build_excel(stmts)
 
-        # Post Linear issues
-        if _LINEAR_AVAILABLE and os.environ.get("LINEAR_API_KEY"):
-            print("    Posting to Linear...")
+        # Post to Linear via Zapier webhook
+        webhook_url = os.environ.get("ZAPIER_WEBHOOK_URL")
+        if _ZAPIER_AVAILABLE and webhook_url:
+            print("    Sending to Zapier → Linear...")
             try:
-                linear = LinearClient()
-                post_statement_issues(linear, data)
-            except Exception as le:
-                print(f"    Linear warning: {le}")
+                _zapier_post(webhook_url, data)
+            except Exception as ze:
+                print(f"    Zapier warning: {ze}")
         else:
-            print("    Linear: skipped (LINEAR_API_KEY not set)")
+            print("    Zapier: skipped (ZAPIER_WEBHOOK_URL not set)")
 
         print(f"    Done ✓")
 
