@@ -1,0 +1,20 @@
+# Google OAuth credentials & tokens — never commit these
+google_credentials.json
+google_token.json
+*.pickle
+
+# Processed statement data — contains personal financial info
+*.csv
+Processed/
+*.json
+
+# Excel output
+Budget Tracker.xlsx
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.env
