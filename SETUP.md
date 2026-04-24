@@ -15,7 +15,20 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 echo 'export ANTHROPIC_API_KEY="sk-ant-..."' >> ~/.zshrc
 ```
 
-### 3. Set up Google OAuth credentials
+### 3. Set your Linear API key (optional but recommended)
+1. Go to Linear → **Settings → API → Personal API keys** → Create key
+2. Export it:
+```bash
+export LINEAR_API_KEY="lin_api_..."
+echo 'export LINEAR_API_KEY="lin_api_..."' >> ~/.zshrc
+```
+The agent will automatically:
+- Create a **"Budget App"** project in your Linear workspace
+- Open a **Statement Processed** issue for every PDF (Medium priority)
+- Open a **Payment Due** reminder with due date and amount (High priority)
+- Open **Urgent** issues for any past due or overlimit accounts
+
+### 4. Set up Google OAuth credentials (optional)
 1. Go to https://console.cloud.google.com/
 2. Create a new project (or select existing)
 3. Enable **Google Sheets API** and **Google Drive API**

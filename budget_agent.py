@@ -7,15 +7,17 @@ Each new PDF is:
   1. Parsed by Claude AI (extracts all transactions + account info)
   2. Saved as JSON to Statements Inbox/Processed/
   3. Rebuilds Budget Tracker.xlsx from all historical JSONs
-  4. Moved to Processed/
+  4. Creates/updates Linear issues in the "Budget App" project
+  5. Moved to Processed/
 
 Run modes:
   python budget_agent.py            # process any PDFs in Inbox now, then exit
   python budget_agent.py --watch    # stay running, process new PDFs as they arrive
 
 Requirements:
-  pip install anthropic pdfplumber openpyxl watchdog
+  pip install anthropic pdfplumber openpyxl watchdog requests
   export ANTHROPIC_API_KEY="sk-ant-..."
+  export LINEAR_API_KEY="lin_api_..."   # optional — skipped if not set
 """
 
 import argparse
@@ -26,6 +28,13 @@ import sys
 import time
 from datetime import date
 from pathlib import Path
+
+# Linear integration (optional — only active when LINEAR_API_KEY is set)
+try:
+    from linear_client import LinearClient, post_statement_issues
+    _LINEAR_AVAILABLE = True
+except ImportError:
+    _LINEAR_AVAILABLE = False
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 DRIVE_ROOT = Path("/Users/gustavooviedo/Library/CloudStorage/GoogleDrive-gustavobills7@gmail.com/My Drive")
@@ -544,6 +553,17 @@ def process_pdf(pdf_path: Path):
         print("    Rebuilding Budget Tracker.xlsx...")
         stmts = load_all_statements()
         build_excel(stmts)
+
+        # Post Linear issues
+        if _LINEAR_AVAILABLE and os.environ.get("LINEAR_API_KEY"):
+            print("    Posting to Linear...")
+            try:
+                linear = LinearClient()
+                post_statement_issues(linear, data)
+            except Exception as le:
+                print(f"    Linear warning: {le}")
+        else:
+            print("    Linear: skipped (LINEAR_API_KEY not set)")
 
         print(f"    Done ✓")
 
