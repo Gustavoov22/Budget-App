@@ -15,9 +15,9 @@ Run modes:
   python budget_agent.py --watch    # stay running, process new PDFs as they arrive
 
 Requirements:
-  pip install anthropic pdfplumber openpyxl watchdog requests
+  pip install anthropic pdfplumber openpyxl watchdog
   export ANTHROPIC_API_KEY="sk-ant-..."
-  export LINEAR_API_KEY="lin_api_..."   # optional — skipped if not set
+  export ZAPIER_API_KEY="..."   # optional — creates Linear issues via Zapier MCP
 """
 
 import argparse
@@ -554,16 +554,16 @@ def process_pdf(pdf_path: Path):
         stmts = load_all_statements()
         build_excel(stmts)
 
-        # Post to Linear via Zapier webhook
-        webhook_url = os.environ.get("ZAPIER_WEBHOOK_URL")
-        if _ZAPIER_AVAILABLE and webhook_url:
-            print("    Sending to Zapier → Linear...")
+        # Post to Linear via Zapier MCP
+        zapier_key = os.environ.get("ZAPIER_API_KEY")
+        if _ZAPIER_AVAILABLE and zapier_key:
+            print("    Creating Linear issues via Zapier MCP...")
             try:
-                _zapier_post(webhook_url, data)
+                _zapier_post(zapier_key, data)
             except Exception as ze:
                 print(f"    Zapier warning: {ze}")
         else:
-            print("    Zapier: skipped (ZAPIER_WEBHOOK_URL not set)")
+            print("    Zapier: skipped (ZAPIER_API_KEY not set)")
 
         print(f"    Done ✓")
 
